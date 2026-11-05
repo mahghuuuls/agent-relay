@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-relay"
+dynamic = ["version"]
+description = "A local consultation relay for independent agents"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+agent-relay = "agent_relay.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["agent_relay*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "agent_relay.__version__"}

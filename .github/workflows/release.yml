@@ -1,0 +1,37 @@
+name: Publish Agent Relay
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.10"
+      - name: Verify and build the wheel
+        shell: bash
+        run: |
+          version=$(python -c 'from agent_relay import __version__; print(__version__)')
+          test "$GITHUB_REF_NAME" = "v$version"
+          python -W error::ResourceWarning -m unittest discover -s tests -v
+          python -m pip wheel --no-deps --wheel-dir dist .
+          filename="agent_relay-$version-py3-none-any.whl"
+          (cd dist && sha256sum "$filename") > "dist/$filename.sha256"
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.whl dist/*.whl.sha256 \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --title "Agent Relay ${GITHUB_REF_NAME#v}" \
+            --notes "Install the wheel with Python 3.10 or later. The companion SHA-256 file identifies the exact release artifact."
