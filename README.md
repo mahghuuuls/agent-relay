@@ -78,3 +78,5 @@ The integration test opens a room, joins two independent CLI clients with the sa
 ## Releases
 
 The release workflow runs the test suite and publishes the wheel and its SHA-256 checksum when a version tag matching the package version is pushed. A consuming workflow can pin the release wheel URL and digest before offering an on-demand installation.
+
+If a tag exists without a release and GitHub did not start its job, a branch named `release/vX.Y.Z` runs the same job against that existing tag. The wheel is always built from the tag's source.
